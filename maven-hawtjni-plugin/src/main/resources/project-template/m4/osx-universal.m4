@@ -53,7 +53,7 @@ AC_DEFUN([WITH_OSX_UNIVERSAL],
     ],[
       OSX_VERSION=""
       for v in 10.0 10.1 10.2 10.3 10.4 10.5 10.6 10.7 10.8 10.9 10.10 ; do
-        if test -z "${OSX_VERSION}" && test -d "/Developer/SDKs/MacOSX${v}.sdk" ; then 
+        if test -z "${OSX_VERSION}" && test -d "${OSX_PLATFORM}/MacOSX${v}.sdk" ; then 
           OSX_VERSION="${v}"
         fi
       done
@@ -88,9 +88,9 @@ AC_DEFUN([WITH_OSX_UNIVERSAL],
         LDFLAGS="-arch $i $LDFLAGS"
       done 
       
-      CFLAGS="-isysroot /Developer/SDKs/MacOSX${OSX_VERSION}.sdk $CFLAGS"
-      CXXFLAGS="-isysroot /Developer/SDKs/MacOSX${OSX_VERSION}.sdk $CXXFLAGS"
-      LDFLAGS="-syslibroot,/Developer/SDKs/MacOSX${OSX_VERSION}.sdk $LDFLAGS"
+      CFLAGS="-isysroot ${OSX_PLATFORM}/MacOSX${OSX_VERSION}.sdk $CFLAGS"
+      CXXFLAGS="-isysroot ${OSX_PLATFORM}/MacOSX${OSX_VERSION}.sdk $CXXFLAGS"
+      LDFLAGS="-syslibroot,${OSX_PLATFORM}/MacOSX${OSX_VERSION}.sdk $LDFLAGS"
       AC_SUBST(CFLAGS)
       AC_SUBST(CXXFLAGS)
       AC_SUBST(LDFLAGS)
@@ -99,4 +99,41 @@ AC_DEFUN([WITH_OSX_UNIVERSAL],
   esac
 ])
 
+dnl ---------------------------------------------------------------------------
+dnl SYNOPSIS:
+dnl
+dnl   WITH_OSX_SDKS()
+dnl
+dnl   Allows creating universal binaries on the 
+dnl
+dnl   Adds the --with-platform-sdks=LOCATION option.  This will configure
+dnl   the location of the platform SDKs. The default value is set to
+dnl   /Developer/SDKs.
+dnl
+dnl AUTHOR: <a href="mailto:laurent.mihalkovic@gmail.com</a>
+dnl ---------------------------------------------------------------------------
+
+AC_DEFUN([WITH_OSX_SDKS],
+[
+  AC_PREREQ([2.61])
+  case "$host_os" in
+  darwin*)
+    AC_MSG_CHECKING(OSX Platform SDKs location)
+    AC_ARG_WITH([platform-sdks],
+    [AS_HELP_STRING([--with-platform-sdks@<:@=OSX_SDKS@:>@],
+    [Location of the OSX platform SDKs. Default is /Developer/SDKs])],
+    [ 
+      if test "$withval" = "no" || test "$withval" = "yes"; then
+        AC_MSG_ERROR([--with-platform-sdks: path to OSX platform SDKs not supplied])
+      fi
+      OSX_PLATFORM="$withval"
+    ], [
+      OSX_PLATFORM="/Developer/SDKs"
+    ])
+    AC_MSG_RESULT([$OSX_PLATFORM])
+    AC_SUBST(OSX_PLATFORM)
+
+    ;;
+  esac
+])
 
